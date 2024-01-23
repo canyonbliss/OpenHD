@@ -11,3 +11,6 @@
 	path = OpenHD/lib/wifibroadcast
 	url = https://github.com/OpenHD/wifibroadcast
 	branch = openhd-release
+[submodule "OpenHD/lib/cmake-git-version-tracking"]
+	path = OpenHD/lib/cmake-git-version-tracking
+	url = https://github.com/andrew-hardin/cmake-git-version-tracking.git
