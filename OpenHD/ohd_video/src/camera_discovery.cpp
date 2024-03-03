@@ -121,6 +121,7 @@ std::vector<Camera> DCameras::detect_raspberrypi_broadcom_csi(std::shared_ptr<sp
       camera.vendor = "RaspberryPi";
       camera.type = CameraType::RPI_CSI_MMAL;
       camera.bus = "0";
+      camera.video_index=std::atoi(camera.bus.c_str());
       camera.rpi_csi_mmal_is_csi_to_hdmi= true;
       ret.push_back(camera);
     }else{
@@ -129,6 +130,7 @@ std::vector<Camera> DCameras::detect_raspberrypi_broadcom_csi(std::shared_ptr<sp
       camera.vendor = "RaspberryPi";
       camera.type = CameraType::RPI_CSI_MMAL;
       camera.bus = "0";
+      camera.video_index=std::atoi(camera.bus.c_str());
       ret.push_back(camera);
     }
   }
@@ -138,6 +140,7 @@ std::vector<Camera> DCameras::detect_raspberrypi_broadcom_csi(std::shared_ptr<sp
     camera.vendor = "RaspberryPi";
     camera.type = CameraType::RPI_CSI_MMAL;
     camera.bus = "1";
+    camera.video_index=std::atoi(camera.bus.c_str());
     ret.push_back(camera);
   }
   return ret;
@@ -152,6 +155,7 @@ std::vector<Camera> DCameras::detect_allwinner_csi(std::shared_ptr<spdlog::logge
     camera.vendor = "Allwinner";
     camera.type = CameraType::ALLWINNER_CSI;
     camera.bus = "0";
+    camera.video_index=std::atoi(camera.bus.c_str());
     return {camera};
   }
   return {};
@@ -166,6 +170,7 @@ std::vector<Camera> DCameras::detect_rockchip_csi(std::shared_ptr<spdlog::logger
     camera.vendor = "Rockchip";
     camera.type = CameraType::ROCKCHIP_CSI;
     camera.bus = "11";
+    camera.video_index=std::atoi(camera.bus.c_str());
     return {camera};
   }
   return {};
@@ -175,6 +180,8 @@ std::vector<Camera> DCameras::detect_rapsberrypi_veye_v4l2_dirty(std::shared_ptr
   m_console->debug("detect_rapsberrypi_veye_v4l2_dirty");
   std::vector<Camera> ret{};
   const auto devices = openhd::v4l2::findV4l2VideoDevices();
+  const std::regex r{"/dev/video([\\d]+)"};
+
   for (const auto &device: devices) {
     // dirty, but works
     // We are only interested in veye camera(s), so first get rid of anything not using rpi unicam
@@ -200,9 +207,14 @@ std::vector<Camera> DCameras::detect_rapsberrypi_veye_v4l2_dirty(std::shared_ptr
     const bool is_veye=OHDUtil::contains(v4l2_info_video0,"veye327") || OHDUtil::contains(v4l2_info_video0,"csimx307") || OHDUtil::contains(v4l2_info_video0,"veyecam2m");
     if(is_veye){
       Camera camera;
+      std::smatch result;
+      if (!std::regex_search(device, result, r)) {
+        continue;
+      }
       camera.type=CameraType::RPI_CSI_VEYE_V4l2;
       camera.bus=device;
       camera.index=0;
+      camera.video_index=std::atoi(result[1].str().c_str());
       camera.name = fmt::format("Pi_VEYE_{}",ret.size());
       camera.vendor = "VEYE";
       ret.push_back(camera);
@@ -232,6 +244,8 @@ std::vector<Camera> DCameras::detect_raspberrypi_libcamera_csi(std::shared_ptr<s
 
 std::vector<Camera> DCameras::detect_jetson_csi(std::shared_ptr<spdlog::logger> &m_console) {
   const auto devices=openhd::v4l2::findV4l2VideoDevices();
+  const std::regex r{"/dev/video([\\d]+)"};
+
   for(const auto& device:devices){
     auto v4l2_fp_holder=std::make_unique<openhd::v4l2::V4l2FPHolder>(device,PlatformType::Jetson);
     if(!v4l2_fp_holder->opened_successfully()){
@@ -241,13 +255,20 @@ std::vector<Camera> DCameras::detect_jetson_csi(std::shared_ptr<spdlog::logger> 
     if(!caps_opt){
       continue;
     }
+
     const auto caps=caps_opt.value();
     const std::string driver((char *)caps.driver);
     if(driver=="tegra-video"){
       m_console->debug("Found Jetson CSI camera");
       Camera camera;
+      std::smatch result;
+      if (!std::regex_search(device, result, r)) {
+        continue;
+      }
       camera.type=CameraType::JETSON_CSI;
-      camera.bus="0";
+      camera.bus=result[1].str();
+      camera.video_index=std::atoi(camera.bus.c_str());
+      m_console->debug("Found Jetson CSI camera at video {}", camera.video_index);
       camera.index=0;
       camera.name = "JETSON_CSI_0";
       camera.vendor = "NVIDIA";

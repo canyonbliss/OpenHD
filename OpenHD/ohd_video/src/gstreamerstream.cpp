@@ -192,9 +192,9 @@ void GStreamerStream::setup() {
 
 void GStreamerStream::setup_raspberrypi_mmal_csi() {
   m_console->debug("Setting up Raspberry Pi CSI camera");
-  // similar to jetson, for now we assume there is only one CSI camera connected.
+  const auto& camera= m_camera_holder->get_camera();
   const auto& setting= m_camera_holder->get_settings();
-  m_pipeline_content << OHDGstHelper::createRpicamsrcStream(-1, setting,m_camera_holder->requires_half_bitrate_workaround());
+  m_pipeline_content << OHDGstHelper::createRpicamsrcStream(camera.video_index, setting,m_camera_holder->requires_half_bitrate_workaround());
 }
 
 void GStreamerStream::setup_raspberrypi_veye_v4l2() {
@@ -215,12 +215,9 @@ void GStreamerStream::setup_raspberrypi_libcamera() {
 
 void GStreamerStream::setup_jetson_csi() {
   m_console->debug("Setting up Jetson CSI camera");
-  // Well, i fixed the bug in the detection, with v4l2_open.
-  // But still, /dev/video1 can be camera index 0 on jetson.
-  // Therefore, for now, we just default to no camera index rn and let nvarguscamerasrc figure out the camera index.
-  // This will work as long as there is no more than 1 CSI camera.
+  const auto& camera= m_camera_holder->get_camera();
   const auto& setting= m_camera_holder->get_settings();
-  m_pipeline_content << OHDGstHelper::createJetsonStream(-1,setting);
+  m_pipeline_content << OHDGstHelper::createJetsonStream(camera.video_index, setting);
 }
 
 void GStreamerStream::setup_rockchip_hdmi() {
@@ -237,8 +234,9 @@ void GStreamerStream::setup_rockchip_csi() {
 
 void GStreamerStream::setup_allwinner_csi() {
   m_console->debug("Setting up Allwinner CSI camera");
+  const auto& camera= m_camera_holder->get_camera();
   const auto& setting=m_camera_holder->get_settings();
-  m_pipeline_content << OHDGstHelper::createAllwinnerStream(0,setting.h26x_bitrate_kbits, setting.streamed_video_format, setting.h26x_keyframe_interval);
+  m_pipeline_content << OHDGstHelper::createAllwinnerStream(camera.video_index, setting.h26x_bitrate_kbits, setting.streamed_video_format, setting.h26x_keyframe_interval);
 }
 
 void GStreamerStream::setup_usb_uvc() {
