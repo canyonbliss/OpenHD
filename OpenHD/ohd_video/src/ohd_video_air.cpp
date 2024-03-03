@@ -298,6 +298,14 @@ std::vector<Camera> OHDVideoAir::discover_cameras(const OHDPlatform& platform) {
         usb_cameras=DCameras::detect_usb_cameras(platform,m_console);
       }
       cameras.emplace_back(usb_cameras.at(0));
+    }else if(cam_type==CameraType::JETSON_CSI){
+      auto jetson_cameras=DCameras::detect_jetson_csi(m_console);
+      while (jetson_cameras.empty()){
+        m_console->debug("Waiting for jetson csi camera");
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        jetson_cameras=DCameras::detect_jetson_csi(m_console);
+      }
+      cameras.emplace_back(jetson_cameras.at(0));
     }
     else{
       m_console->warn("Unsupported manual camera type {}", camera_type_to_string(cam_type));
