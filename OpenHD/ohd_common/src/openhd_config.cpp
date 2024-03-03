@@ -9,7 +9,7 @@
 
 #include "../lib/ini/ini.hpp"
 
-static std::string CONFIG_FILE_PATH="/boot/openhd/hardware.config";
+static std::string CONFIG_FILE_PATH="/etc/openhd/hardware.config";
 
 static std::shared_ptr<spdlog::logger> get_logger(){
   return openhd::log::create_or_get("config");

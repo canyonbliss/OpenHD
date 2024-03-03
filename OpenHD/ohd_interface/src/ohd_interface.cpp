@@ -240,7 +240,7 @@ void OHDInterface::generate_keys_from_pw_if_exists_and_delete() {
     exit(EXIT_FAILURE);
   }
   auto console=openhd::log::get_default();
-  static constexpr auto PW_FILENAME="/boot/openhd/password.txt";
+  static constexpr auto PW_FILENAME="/etc/openhd/password.txt";
   if(OHDFilesystemUtil::exists(PW_FILENAME)){
     auto pw=OHDFilesystemUtil::read_file(PW_FILENAME);
     OHDUtil::trim(pw);

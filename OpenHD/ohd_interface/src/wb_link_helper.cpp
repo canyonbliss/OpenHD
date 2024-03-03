@@ -9,7 +9,7 @@
 //#include "wifi_command_helper2.h"
 
 bool openhd::wb::disable_all_frequency_checks() {
-  static constexpr auto FIlE_DISABLE_ALL_FREQUENCY_CHECKS="/boot/openhd/disable_all_frequency_checks.txt";
+  static constexpr auto FIlE_DISABLE_ALL_FREQUENCY_CHECKS="/etc/openhd/disable_all_frequency_checks.txt";
   return OHDFilesystemUtil::exists(FIlE_DISABLE_ALL_FREQUENCY_CHECKS);
 }
 

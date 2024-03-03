@@ -14,11 +14,11 @@ namespace openhd {
 // from https://superuser.com/questions/631859/preferred-place-to-store-configuration-files-that-change-often
 // All persistent settings are written into this directory.
 // Jan 28 / v2.3.1 : A lot of (rpi) users complained that they cannot change settings manually anymore.
-// Even though this is not recommended, we want to support that - and since on rpi image only /boot shows up
+// Even though this is not recommended, we want to support that - and since on rpi image only /etc shows up
 // under windows in the file reader, we had to change the path in this regard. Shouldn't create any issues
 // on linux, since we are root, we can just cretae the directory at run time
-// !!!! Had to be reverted - writing to /boot on rpi is too prone to file system corruption !!!
-//static constexpr auto SETTINGS_BASE_PATH ="/boot/openhd/settings/";
+// !!!! Had to be reverted - writing to /etc on rpi is too prone to file system corruption !!!
+//static constexpr auto SETTINGS_BASE_PATH ="/etc/openhd/settings/";
 static constexpr auto SETTINGS_BASE_PATH ="/usr/local/share/openhd/";
 // for example, the unique id
 static std::string get_unit_id_file_path(){
