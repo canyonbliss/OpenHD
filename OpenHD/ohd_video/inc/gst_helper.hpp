@@ -84,7 +84,7 @@ static std::string gst_create_rtp_caps(const VideoCodec& videoCodec){
   if(videoCodec==VideoCodec::H264){
     ss<<"caps=\"application/x-rtp, media=(string)video, encoding-name=(string)H264, payload=(int)96\"";
   }else if(videoCodec==VideoCodec::H265){
-    ss<<"caps=\"application/x-rtp, media=(string)video, encoding-name=(string)H265\"";
+    ss<<"caps=\"application/x-rtp-stream, media=(string)video, encoding-name=(string)H265\"";
   }else{
     ss<<"caps=\"application/x-rtp, media=(string)video, encoding-name=(string)mjpeg\"";
   }
@@ -110,7 +110,7 @@ static std::string create_rtp_depacketize_for_codec(const VideoCodec& codec){
 static std::string create_parse_for_codec(const VideoCodec& codec){
   // config-interval=-1 = makes 100% sure each keyframe has SPS and PPS
   if(codec==VideoCodec::H264)return "h264parse config-interval=-1 ! ";
-  if(codec==VideoCodec::H265)return "h265parse config-interval=-1  ! ";
+  if(codec==VideoCodec::H265)return "video/x-h265, stream-format=byte-stream ! h265parse config-interval=-1  ! ";
   if(codec==VideoCodec::MJPEG)return "jpegparse ! ";
   assert(false);
   return "";
@@ -405,10 +405,10 @@ static std::string createJetsonEncoderPipeline(const CommonEncoderParams& common
       ss<<"! ";
     }
   }else if(common_encoder_params.videoCodec==VideoCodec::H265){
-	  const bool use_omx_encoder= false;
+    const bool use_omx_encoder = true;
     if(use_omx_encoder){
       // for omx control-rate=2 means constant, in contrast to nvv4l2h264enc
-      ss<<"omxh265enc control-rate=2 insert-sps-pps=true bitrate="<<bitrateBitsPerSecond<<" ";
+      ss<<"omxh265enc control-rate=2 EnableStringentBitrate=true bitrate="<<bitrateBitsPerSecond<<" ";
       ss<<"iframeinterval="<<common_encoder_params.h26X_keyframe_interval<<" ";
       ss<<"! ";
     }else{
@@ -438,7 +438,7 @@ static std::string createJetsonSensorPipeline(const int sensor_id,const int widt
   if (sensor_id == -1) {
 	  ss << "nvarguscamerasrc do-timestamp=true ! ";
   } else {
-	  ss<<"nvarguscamerasrc do-timestamp=true sensor-id="<<sensor_id<<" ! ";
+	  ss << "nvarguscamerasrc do-timestamp=true sensor-id="<<sensor_id<<" ! ";
   }
   ss<<"video/x-raw(memory:NVMM), format=NV12, ";
   ss<<"width="<<width<<", ";
@@ -626,7 +626,7 @@ static std::string createV4l2SrcAlreadyEncodedStream(
   if (video_codec == VideoCodec::H264) {
       ss << "video/x-h264";
   } else if (video_codec == VideoCodec::H265) {
-      ss<<"video/x-h265";
+      ss << "video/x-h265,stream-format=byte-stream";
   } else {
     assert(video_codec == VideoCodec::MJPEG);
     ss<<"image/jpeg";
@@ -726,13 +726,13 @@ static std::string createRecordingForVideoCodec(const VideoCodec videoCodec,cons
   if (videoCodec == VideoCodec::H264) {
     ss << "h264parse ! ";
   } else if (videoCodec == VideoCodec::H265) {
-    ss << "h265parse ! ";
+    ss << "video/x-h265, stream-format=byte-stream ! h265parse ! ";
   } else {
     assert(videoCodec == VideoCodec::MJPEG);
     ss << "jpegparse ! ";
   }
   //ss <<"mp4mux ! filesink location="<<out_filename;
-  if(videoCodec==VideoCodec::H264 || videoCodec==VideoCodec::H265){
+  if(videoCodec==VideoCodec::H264 || videoCodec==VideoCodec::H265) {
     ss <<"matroskamux ! filesink location="<<out_filename;
   }else{
     ss <<"avimux ! filesink location="<<out_filename;
