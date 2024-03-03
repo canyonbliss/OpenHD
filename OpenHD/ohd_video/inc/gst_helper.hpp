@@ -32,9 +32,15 @@ struct CommonEncoderParams{
   int mjpeg_quality_percent;
 };
 
-static CommonEncoderParams extract_common_encoder_params(const CameraSettings& settings){
-  return {.videoCodec=settings.streamed_video_format.videoCodec,.h26X_bitrate_kbits=settings.h26x_bitrate_kbits,
-  .h26X_keyframe_interval=settings.h26x_keyframe_interval,.mjpeg_quality_percent=settings.mjpeg_quality_percent};
+static CommonEncoderParams extract_common_encoder_params(
+		const CameraSettings &settings) {
+	CommonEncoderParams cep = {
+			.videoCodec=settings.streamed_video_format.videoCodec,
+			.h26X_bitrate_kbits=settings.h26x_bitrate_kbits,
+			.h26X_keyframe_interval=settings.h26x_keyframe_interval,
+			.mjpeg_quality_percent=settings.mjpeg_quality_percent
+	};
+	return cep;
 }
 
 /**

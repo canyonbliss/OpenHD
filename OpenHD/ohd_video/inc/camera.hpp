@@ -72,6 +72,9 @@ struct Camera {
   // Unique index of this camera, should start at 0. The index number depends on
   // the order the cameras were picked up during the discovery step.
   int index = 0;
+  // for CSI cameras its the index of the video device
+  // the int version of bus but I do not like multi use variables
+  int video_index = -1;
   // this is only for camera tye RPI_CSI_MMAL - differentiate between CSI camera and the HDMI to CSI adapter
   // (since the second one needs workarounds)
   bool rpi_csi_mmal_is_csi_to_hdmi=false;
